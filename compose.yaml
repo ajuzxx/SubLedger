@@ -6,15 +6,15 @@ services:
     env_file:
       - .env
     environment:
-      POSTGRES_DB: ${DB_NAME:-subledger}
-      POSTGRES_USER: ${DB_USER:-subledger_user}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-subledger_password}
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "${DB_PORT:-5433}:5432"
+      - "${DB_PORT}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-subledger_user} -d ${DB_NAME:-subledger}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
       interval: 5s
       timeout: 5s
       retries: 5
