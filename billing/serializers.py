@@ -1,6 +1,11 @@
 from rest_framework import serializers
-from .models import Plan, Customer, Subscription, Invoice
-
+from .models import (
+    Plan,
+    Customer,
+    Subscription,
+    Invoice,
+    PaymentAttempt,
+)
 class PlanSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -35,3 +40,8 @@ class InvoiceSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         ]
+class PaymentAttemptSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PaymentAttempt
+        fields = "__all__"
+        read_only_fields = ["created_at"]

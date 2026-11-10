@@ -1,16 +1,19 @@
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.exceptions import ValidationError
-from .models import Plan, Customer, Subscription, Invoice
+from .models import Plan, Customer, Subscription, Invoice, PaymentAttempt
 
 from .serializers import (
     PlanSerializer,
     CustomerSerializer,
     SubscriptionSerializer,
     InvoiceSerializer,
+    PaymentAttemptSerializer,
 )
 
 from .services.invoice_service import InvoiceService
 from .services.subscription_service import SubscriptionService
+from .services.payment_service import PaymentService
+
 from .models import Plan, Customer,  Subscription, Invoice
 from .serializers import (
     PlanSerializer,
@@ -69,3 +72,31 @@ class InvoiceViewSet(ModelViewSet):
 
         # Give DRF the object created by our service.
         serializer.instance = invoice
+
+
+class PaymentViewSet(ModelViewSet):
+    queryset = PaymentAttempt.objects.select_related(
+        "invoice",
+        "invoice__subscription",
+        "invoice__subscription__customer",
+    )
+    serializer_class = PaymentAttemptSerializer
+
+    def perform_create(self, serializer):
+        try:
+            payment_attempt, updated_invoice = (
+                PaymentService.process_payment(
+                    invoice=serializer.validated_data["invoice"],
+                    amount=serializer.validated_data["amount"],
+                    currency=serializer.validated_data["currency"],
+                    status=serializer.validated_data["status"],
+                    provider_reference=serializer.validated_data[
+                        "provider_reference"
+                    ],
+                )
+            )
+
+            serializer.instance = payment_attempt
+
+        except ValueError as error:
+            raise ValidationError({"detail": str(error)})
