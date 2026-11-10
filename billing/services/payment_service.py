@@ -38,6 +38,22 @@ class PaymentService:
         if status not in ["successful", "failed"]:
             raise ValueError("Payment status must be successful or failed.")
 
+
+        if not provider_reference:
+            raise ValueError("Provider reference is required.")
+
+        existing_attempt = PaymentAttempt.objects.filter(
+            provider_reference=provider_reference
+        ).exists()
+
+        if existing_attempt:
+            raise ValueError("This payment reference has already been used.")
+        
+
+
+
+
+
         # 4. Prevent payment against a fully paid invoice.
         if invoice.status == "paid":
             raise ValueError("This invoice is already fully paid.")

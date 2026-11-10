@@ -58,21 +58,24 @@ class InvoiceViewSet(ModelViewSet):
     )
     serializer_class = InvoiceSerializer
 
+
     def perform_create(self, serializer):
-        invoice = InvoiceService.generate_invoice(
-            subscription=serializer.validated_data["subscription"],
-            billing_period_start=serializer.validated_data[
-                "billing_period_start"
-            ],
-            billing_period_end=serializer.validated_data[
-                "billing_period_end"
-            ],
-            due_date=serializer.validated_data["due_date"],
-        )
+        try:
+            invoice = InvoiceService.generate_invoice(
+                subscription=serializer.validated_data["subscription"],
+                billing_period_start=serializer.validated_data[
+                    "billing_period_start"
+                ],
+                billing_period_end=serializer.validated_data[
+                    "billing_period_end"
+                ],
+                due_date=serializer.validated_data["due_date"],
+            )
 
-        # Give DRF the object created by our service.
-        serializer.instance = invoice
+            serializer.instance = invoice
 
+        except ValueError as error:
+            raise ValidationError({"detail": str(error)})
 
 class PaymentViewSet(ModelViewSet):
     queryset = PaymentAttempt.objects.select_related(

@@ -2,7 +2,8 @@
 from django.db import models
 from django.core.validators import MinValueValidator
 from decimal import Decimal
-
+from django.db.models import UniqueConstraint
+from django.db.models import Q
 class Plan(models.Model):
 
     name = models.CharField(max_length=100)
@@ -128,6 +129,18 @@ class Invoice(models.Model):
         choices=STATUS_CHOICES,
         default="pending"
     )
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                fields=[
+                    "subscription",
+                    "billing_period_start",
+                    "billing_period_end",
+                ],
+                name="unique_subscription_billing_period",
+            )
+        ]
+
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -135,6 +148,14 @@ class Invoice(models.Model):
     def __str__(self):
         return self.invoice_number
 class PaymentAttempt(models.Model):
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                fields=["provider_reference"],
+                condition=~Q(provider_reference=""),
+                name="unique_payment_provider_reference",
+            )
+        ]
 
     STATUS_CHOICES = [
         ("pending", "Pending"),

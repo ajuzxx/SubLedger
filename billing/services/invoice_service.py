@@ -32,12 +32,24 @@ class InvoiceService:
                 "Billing period start cannot be after billing period end."
             )
 
-        # 3. Generate unique invoice number
+        # 3. Guard: prevent duplicate invoice for same subscription + billing period (BR-4)
+        existing_invoice = Invoice.objects.filter(
+            subscription=subscription,
+            billing_period_start=billing_period_start,
+            billing_period_end=billing_period_end,
+        ).exists()
+
+        if existing_invoice:
+            raise ValueError(
+                "An invoice already exists for this subscription and billing period."
+            )
+
+        # 4. Generate unique invoice number
         invoice_number = (
             f"INV-{uuid.uuid4().hex[:8].upper()}"
         )
 
-        # 4. Create invoice
+        # 5. Create invoice — snapshot the plan price into amount_due (BR-5)
         invoice = Invoice.objects.create(
             subscription=subscription,
             invoice_number=invoice_number,
@@ -50,7 +62,7 @@ class InvoiceService:
             status="pending",
         )
 
-        # 5. Create ledger entry
+        # 6. Create ledger entry (append-only, BR-9)
         LedgerEntry.objects.create(
             customer=subscription.customer,
             invoice=invoice,
