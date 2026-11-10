@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Plan, Customer, Subscription
+from .models import Plan, Customer, Subscription, Invoice
 
 class PlanSerializer(serializers.ModelSerializer):
 
@@ -21,3 +21,17 @@ class SubscriptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Subscription
         fields = "__all__"
+
+class InvoiceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Invoice
+        fields = "__all__"
+        read_only_fields = [
+            "invoice_number",
+            "amount_due",
+            "amount_paid",
+            "currency",
+            "status",
+            "created_at",
+            "updated_at",
+        ]
