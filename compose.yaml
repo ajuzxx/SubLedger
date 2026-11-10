@@ -1,0 +1,20 @@
+
+services:
+  db:
+    image: postgres:16
+    container_name: subledger_db
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: subledger
+      POSTGRES_USER: subledger_user
+      POSTGRES_PASSWORD: subledger_password
+
+    ports:
+      - "5433:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
