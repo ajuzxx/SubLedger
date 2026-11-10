@@ -1,7 +1,7 @@
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.exceptions import ValidationError
 from .models import Plan, Customer, Subscription, Invoice, PaymentAttempt
-
+from .permissions import BillingRolePermission
 from .serializers import (
     PlanSerializer,
     CustomerSerializer,
@@ -25,10 +25,11 @@ from .serializers import (
 class PlanViewSet(ModelViewSet):
     queryset = Plan.objects.all()
     serializer_class = PlanSerializer
-
+    permission_classes = [BillingRolePermission]
 class CustomerViewSet(ModelViewSet):
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
+    permission_classes = [BillingRolePermission]
 
 
 class SubscriptionViewSet(ModelViewSet):
@@ -37,6 +38,7 @@ class SubscriptionViewSet(ModelViewSet):
         "plan"
     )
     serializer_class = SubscriptionSerializer
+    permission_classes = [BillingRolePermission]
 
     def perform_create(self, serializer):
         try:
@@ -57,6 +59,7 @@ class InvoiceViewSet(ModelViewSet):
         "subscription__plan",
     )
     serializer_class = InvoiceSerializer
+    permission_classes = [BillingRolePermission]
 
 
     def perform_create(self, serializer):
@@ -84,6 +87,7 @@ class PaymentViewSet(ModelViewSet):
         "invoice__subscription__customer",
     )
     serializer_class = PaymentAttemptSerializer
+    permission_classes = [BillingRolePermission]
 
     def perform_create(self, serializer):
         try:
